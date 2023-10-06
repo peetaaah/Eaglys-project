@@ -25,31 +25,21 @@ app.post("/api/modify-sql", async (req, res) => {
   const columnMap = {};
 
   function modifyAst(node) {
-
-    if (node.type === "column_ref") {
-      const originalName = node.column; 
-      const hashedName = hashColumnName(originalName); 
-      node.column = hashedName; 
-      node.as = hashedName; 
-      columnMap[originalName] = hashedName; 
-    } else if (node.columns) {
-      // Check if the node has a "columns" property
-      node.columns.forEach((column) => {
-        if (column.expr && column.expr.type === "column_ref") {
-          const originalName = column.expr.column; 
-          console.log("this is originalName", originalName);
-          const hashedName = hashColumnName(originalName); 
-          column.expr.column = hashedName; 
-          column.expr.as = hashedName; 
-          columnMap[originalName] = hashedName; 
-        }
-      });
-    } else {
-      console.log("not a node");
-    }
+    node.columns.forEach((column) => {
+      if (column.expr && column.expr.type === "column_ref") {
+        const originalName = column.expr.column;
+        console.log("this is originalName", originalName);
+        const hashedName = hashColumnName(originalName);
+        column.expr.column = hashedName;
+        column.expr.as = hashedName;
+        columnMap[originalName] = hashedName;
+      } else {
+        console.log("not a node");
+      }
+    });
 
     if (node.expr) {
-      modifyAst(node.expr); 
+      modifyAst(node.expr);
     }
 
     if (node.left) {
@@ -66,13 +56,10 @@ app.post("/api/modify-sql", async (req, res) => {
     return columnName + "_hashed";
   }
 
-
   modifyAst(ast);
-
 
   // Rebuild SQL from modified AST using node-sql-parser
   const modifiedSql = sqlParser.sqlify(ast);
-
 
   // db.all(modifiedSql, [], (err, rows) => {
   //   if (err) {
