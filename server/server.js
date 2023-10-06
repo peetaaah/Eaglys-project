@@ -27,11 +27,11 @@ app.post("/api/modify-sql", async (req, res) => {
   function modifyAst(node) {
 
     if (node.type === "column_ref") {
-      const originalName = node.column; // Get the original column name
-      const hashedName = hashColumnName(originalName); // Replace with your hash function
-      node.column = hashedName; // Update the AST node with the hashed column name
-      node.as = hashedName; // Set an alias to the hashed column name
-      columnMap[originalName] = hashedName; // Store the mapping in the columnMap object
+      const originalName = node.column; 
+      const hashedName = hashColumnName(originalName); 
+      node.column = hashedName; 
+      node.as = hashedName; 
+      columnMap[originalName] = hashedName; 
     } else if (node.columns) {
       // Check if the node has a "columns" property
       node.columns.forEach((column) => {
@@ -49,10 +49,8 @@ app.post("/api/modify-sql", async (req, res) => {
     }
 
     if (node.expr) {
-      modifyAst(node.expr); // If the node has an 'expr' property, recursively process it
+      modifyAst(node.expr); 
     }
-
-    // Handle other types of nodes as needed
 
     if (node.left) {
       modifyAst(node.left); // Recursively process the left child node
@@ -68,14 +66,14 @@ app.post("/api/modify-sql", async (req, res) => {
     return columnName + "_hashed";
   }
 
-  // console.log(JSON.stringify(ast, null, 2));
+
   modifyAst(ast);
-  // modifyAst(ast);
+
 
   // Rebuild SQL from modified AST using node-sql-parser
   const modifiedSql = sqlParser.sqlify(ast);
 
-  // Query the database and retrieve data (you can customize this query as needed)
+
   // db.all(modifiedSql, [], (err, rows) => {
   //   if (err) {
   //     throw err;
